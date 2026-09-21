@@ -22,6 +22,8 @@ for _ in range(qtde_vezes):
 
 pontos = 0
 
+caminho_atual = []
+
 
 def funcaoMapear():
     posicao = matriz[posicao_linha, posicao_coluna]
@@ -154,9 +156,10 @@ def encontrarSujeiraMaisProxima():
 
 def agenteObjetivo(percepcao, objObtido):
 
-    global pontos
+    global pontos, caminho_atual
 
     if objObtido == 0:
+        caminho_atual = []
         return "NoOp"
 
     posicao, sujeira = percepcao
@@ -164,39 +167,41 @@ def agenteObjetivo(percepcao, objObtido):
     if sujeira:
         aspirar()
         pontos += 1
+        caminho_atual = []
         return "aspirar"
 
-    caminho = encontrarSujeiraMaisProxima()
+    if len(caminho_atual) < 2:
+        caminho_atual = encontrarSujeiraMaisProxima()
 
-    if caminho is None or len(caminho) < 2:
-        return "NoOp"
+        if caminho_atual is None or len(caminho_atual) < 2:
+            caminho_atual = []
+            return "NoOp"
 
-    proxima_posicao = caminho[1]
+    proxima_posicao = caminho_atual[1]
 
     coluna_atual, linha_atual = posicao
     proxima_coluna, proxima_linha = proxima_posicao
 
     if proxima_coluna > coluna_atual:
         moverDireita()
-        pontos += 1
-        return "direita"
-
-    if proxima_coluna < coluna_atual:
+        acao = "direita"
+    elif proxima_coluna < coluna_atual:
         moverEsquerda()
-        pontos += 1
-        return "esquerda"
-
-    if proxima_linha > linha_atual:
+        acao = "esquerda"
+    elif proxima_linha > linha_atual:
         descer()
-        pontos += 1
-        return "abaixo"
-
-    if proxima_linha < linha_atual:
+        acao = "abaixo"
+    elif proxima_linha < linha_atual:
         subir()
-        pontos += 1
-        return "acima"
+        acao = "acima"
+    else:
+        caminho_atual = []
+        return "NoOp"
 
-    return "NoOp"
+    pontos += 1
+    caminho_atual = caminho_atual[1:]
+
+    return acao
 
 
 cores = [
